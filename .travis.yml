@@ -1,0 +1,126 @@
+# sudo: false is faster as it is containerised instead of virtualised.
+# https://docs.travis-ci.com/user/reference/overview/#virtualisation-environment-vs-operating-system
+sudo: false
+dist: trusty
+
+language: c
+compiler: gcc
+
+# $ ./configure --help
+#
+# Some influential environment variables:
+#   CC          C compiler command
+#   CFLAGS      C compiler flags
+#   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+#               nonstandard directory <lib dir>
+#   LIBS        libraries to pass to the linker, e.g. -l<library>
+#   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+#               you have headers in a nonstandard directory <include dir>
+#   CPP         C preprocessor
+#   TCLLIBDIR   Where to install tcl plugin
+#
+# Use these variables to override the choices made by `configure' or to help
+# it to find libraries and programs with nonstandard names/locations.
+#
+# Also: https://docs.travis-ci.com/user/environment-variables/#defining-public-variables-in-travisyml
+env:
+  global:
+    # https://www.sqlite.org/cli.html#_do_it_yourself_builds_
+    #
+    # The following additional compile-time options are recommended in order to
+    # provide a full-featured command-line shell:
+    #
+    # * -DSQLITE_THREADSAFE=0
+    # * -DSQLITE_ENABLE_EXPLAIN_COMMENTS
+    # * -DSQLITE_USE_ZLIB
+    # * -DSQLITE_INTROSPECTION_PRAGMAS
+    # * -DSQLITE_ENABLE_UNKNOWN_SQL_FUNCTION
+    # * -DSQLITE_ENABLE_STMTVTAB
+    # * -DSQLITE_ENABLE_DBPAGE_VTAB
+    # * -DSQLITE_ENABLE_DBSTAT_VTAB
+    # * -DSQLITE_ENABLE_OFFSET_SQL_FUNC
+    # * -DSQLITE_ENABLE_JSON1
+    # * -DSQLITE_ENABLE_RTREE
+    # * -DSQLITE_ENABLE_FTS4
+    # * -DSQLITE_ENABLE_FTS5
+    - CFLAGS="-O2 -march=x86-64 -I./ -I/usr/include/tcl -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_EXPLAIN_COMMENTS -DSQLITE_USE_ZLIB -DSQLITE_INTROSPECTION_PRAGMAS -DSQLITE_ENABLE_UNKNOWN_SQL_FUNCTION -DSQLITE_ENABLE_STMTVTAB -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_DBSTAT_VTAB -DSQLITE_ENABLE_OFFSET_SQL_FUNC -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_FTS5"
+    - LDFLAGS="-march=x86-64"
+    - LIBS="-ldl -lpthread -lz -lm -ltcl"
+
+branches:
+  only:
+    - master
+
+before_install:
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update            ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install md5sha1sum; fi
+
+install:
+  - "wget -i sqlite-src.url"
+  - "sha1sum --check sqlite-src.sha1"
+  - "unzip sqlite-src-*.zip"
+  - rm sqlite-src-*.zip
+  - mv sqlite-src-* sqlite-src
+
+before_script:
+  - "set -o allexport; source ./env; set +o allexport"
+  - "cd sqlite-src"
+
+  - "./configure"
+  - "make sqlite3.c"
+  - "cc -o sqlite3.o -c sqlite3.c ${CFLAGS} ${LDFLAGS} ${LIBS}"
+
+  # sqldiff
+  - "cc -o sqldiff.o -c tool/sqldiff.c ${CFLAGS} ${LDFLAGS} ${LIBS}"
+  - "cc -o sqldiff sqlite3.o sqldiff.o ${CFLAGS} ${LDFLAGS} ${LIBS}"
+  - "sha1sum sqldiff | tee CHECKSUMS.sha1"
+
+  # sqlite3
+  - "make shell.c"
+  - "cc -o shell.o -c shell.c ${CFLAGS} ${LDFLAGS} ${LIBS}"
+  - "cc -o sqlite3 sqlite3.o shell.o ${CFLAGS} ${LDFLAGS} ${LIBS}"
+  - "sha1sum sqlite3 | tee -a CHECKSUMS.sha1"
+
+  # sqlite3_analyzer
+  - "make sqlite3_analyzer.c"
+  - "cc -o sqlite3_analyzer -c sqlite3_analyzer.c ${CFLAGS} ${LDFLAGS} ${LIBS}"
+  - "sha1sum sqlite3_analyzer | tee -a CHECKSUMS.sha1"
+
+  # zip the binaries
+  - "mkdir sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}"
+  - "echo These are UNOFFICIAL SQLite precompiled binaries for ${TRAVIS_OS_NAME} x64, see https://github.com/boramalper/sqlite3-x64 for details. > sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}/NOTICE"
+  - "cp sqldiff sqlite3 sqlite3_analyzer CHECKSUMS.sha1 sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}/"
+  - "zip -r sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}.zip sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}/ -9 -v"
+  - "sha1sum sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}.zip | tee sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}.zip.sha1"
+
+script:
+  - "echo Skipping 'script' stage in Travis CI..."
+
+before_deploy:
+  # Set up git user name and tag this commit
+  - git config --local user.name "Bora M. Alper"
+  - git config --local user.email "boramalper@gmail.com"
+  # $ git help check-ref-format
+  #
+  # 2. They must contain at least one /. This enforces the presence of a
+  #    category like heads/, tags/ etc. but the actual names are not restricted.
+  #    If the --allow-onelevel option is used, this rule is waived.
+  # 4. They cannot have ASCII control characters (i.e. bytes whose values are
+  #    lower than \040, or \177 DEL), space, tilde ~, caret ^, or colon : anywhere.
+  # 5. They cannot have question-mark ?, asterisk *, or open bracket [ anywhere.
+  - git tag "${S64_VERSION}-${TRAVIS_OS_NAME}-$(date +'%Y-%m-%dT%H.%M.%SZ' --utc)"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: x84ON/BlH/QaJ4Pr5XslAYxpu13ZjK3wVQpt8m2UiH6eEij2hAt742Hs53yLU4KSNxw+lM+6aLK45IUn20C4ms0geUKJ4o11ool67W+CxUSV2pPUb0TFuoqe8oAdzWAfHzCmqoKYkt6hlJ4bqS8Jfxh34705TDsOMvycQr803/5FG0YnGW4IKmByIRAf5D+XpJEg2IMUhICTXl29f6q+DggpQUzdeN3V6VPt7mraaWYDh9/QLtiBpxSUx7qqrO36xOdixZF7t6ARf/Wj68pf4u7EinqcPtLM3Q/Lib69QYn0e/CdBejxGyqEXS1GQ+5sS9HyDUzSzth5WrvysYyff+G/se7z9tie/1ybnOleiXmQBmJLuy1Z0TQxnd1yyROD6YRr67GxukeqYe009Vr00mAEG0TRbdCa/GVqO+c4DTf5T4jf/LZEZ1rnIYRyVD+uVbhP1crwQTL/0urCe5/zOhY4DmKcdrfW+PawFRYk5sjR1w05UbnusrCIDNInZ4qD27xUQ3aeBUH03AVz26JkKVMciERJ+kXz32Q99zyLnWlFZLyzIOha3UR+oAJLh0rTxksFWvh/jl5oaHhJLanVqyBVz4YYLtWQ6uCiWFT70z8dXfO/CdMwxo0gdq9POEnMrmDF7H4BYo7pmQjtFXNdr9arw4LHVpafk3oTFR9qCDY=
+  file:
+    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqldiff"
+    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite3"
+    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite3_analyzer"
+    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/CHECKSUMS.sha1"
+    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}.zip"
+    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite-tools-${TRAVIS_OS_NAME}-x64-${S64_VERSION}.zip.sha1"
+  skip_cleanup: true
+  on:
+    repo: "boramalper/sqlite3-x64"
