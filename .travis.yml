@@ -104,7 +104,7 @@ before_deploy:
   # 4. They cannot have ASCII control characters (i.e. bytes whose values are
   #    lower than \040, or \177 DEL), space, tilde ~, caret ^, or colon : anywhere.
   # 5. They cannot have question-mark ?, asterisk *, or open bracket [ anywhere.
-  - git tag "${S64_VERSION}-linux-$(date +'%Y-%m-%dT%H.%M.%SZ' --utc)"
+  - git tag "${S64_VERSION}--$(date +'%Y-%m-%dT%H.%M.%SZ' --utc)"
 
 deploy:
   provider: releases
