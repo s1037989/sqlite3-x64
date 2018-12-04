@@ -43,9 +43,18 @@ env:
     # * -DSQLITE_ENABLE_RTREE
     # * -DSQLITE_ENABLE_FTS4
     # * -DSQLITE_ENABLE_FTS5
-    - CFLAGS="-O2 -march=x86-64 -I./ -I/usr/include/tcl -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_EXPLAIN_COMMENTS -DSQLITE_USE_ZLIB -DSQLITE_INTROSPECTION_PRAGMAS -DSQLITE_ENABLE_UNKNOWN_SQL_FUNCTION -DSQLITE_ENABLE_STMTVTAB -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_DBSTAT_VTAB -DSQLITE_ENABLE_OFFSET_SQL_FUNC -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_FTS5"
+    #
+    #
+    # https://www.sqlite.org/howtocompile.html#compiling_the_command_line_interface
+    #
+    # [...] to get command-line editing support:
+    #
+    # * -DHAVE_READLINE
+    # * -lreadline
+    # * -lncurses
+    - CFLAGS="-O2 -march=x86-64 -I./ -I/usr/include/tcl -DSQLITE_THREADSAFE=0 -DSQLITE_ENABLE_EXPLAIN_COMMENTS -DSQLITE_USE_ZLIB -DSQLITE_INTROSPECTION_PRAGMAS -DSQLITE_ENABLE_UNKNOWN_SQL_FUNCTION -DSQLITE_ENABLE_STMTVTAB -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_DBSTAT_VTAB -DSQLITE_ENABLE_OFFSET_SQL_FUNC -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_FTS5 -DHAVE_READLINE"
     - LDFLAGS="-march=x86-64"
-    - LIBS="-ldl -lpthread -lz -lm -ltcl"
+    - LIBS="-ldl -lpthread -lz -lm -ltcl -lreadline -lncurses"
 
 branches:
   only:
@@ -95,7 +104,7 @@ script:
 before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name "Bora M. Alper"
-  - git config --local user.email "boramalper@gmail.com"
+  - git config --local user.email "bora@boramalper.org"
   # $ git help check-ref-format
   #
   # 2. They must contain at least one /. This enforces the presence of a
