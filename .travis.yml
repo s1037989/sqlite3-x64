@@ -107,8 +107,8 @@ script:
 
 before_deploy:
   # Set up git user name and tag this commit
-  - git config --local user.name "Bora M. Alper"
-  - git config --local user.email "bora@boramalper.org"
+  - git config --local user.name "Stefan Adams"
+  - git config --local user.email "stefan@adams.fm"
   # $ git help check-ref-format
   #
   # 2. They must contain at least one /. This enforces the presence of a
@@ -122,14 +122,14 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: qzaOZ4K7QvEmSoij71PYqgQlxK/AtN9YelFVJwQzqt8Q8cxqqccXtoSciPQHN2nZEVUb2C7qk7bN93vkxL7Id8eN9FpBGx96kqlJqkYZDGJgGKTr+Fq4XuXjZjO2S9qpOJCDXpGOTKJE9qnMV7j08ax1u9OGAw7zeUfRjd1LgIAJEpFLzWGm3GTYy0hLtfrxtD4hodkLaIkA9azgWaKJWwRf0gqc25Ev8PElMGuYov7LtGNmb9V7hpVAqa55vSq32dvVreAoqomfxShmKjwpWP9P2fwxgc/F8XPFcySmxqwGWXfvrxoViQmVqfdW0ZKaBHm1VZkcfc9O6NL90AS2KpNYIn/fgigdPErxqfXP2GFWLVCuHmWVOhU+FoQjq8+sDnvbhOot1zE8NJD/7/HzBYnYK1N1gaf35gXfHHvi5tmnBC2tJ9LMiBk5i51Bgv+hPHLaOo6uYOddVxbOhGOQjek+zs4JmJ3Mqg0ACFC8BvEb8/rrd0qyP4DG+5btpQeDWMGADR9dApdekQnd7UIar9upiQnIQ/UuqKKDsbsx3xQPK1cjfXUbour5PkFe1ckkrGK1S5dDd7ZT2ql/u7GhWZw8W6SOOyTYdeYzW9awqciJQCcg4Sm1xnB4g2KuVxQLHGu1UMzFgb6n7al3i6twwcamVNTvZsjVj7Kbuz6JJnw=
+    secure: "SJyWP09BFoJTmT+4z8uf/36ynWm7TJt7KPBMQywNr0AicO/DHdd0iZLaBWk7FPJSrKPQhLZPAFLG1GrAJVuvuoKtJ64h8YpmISnWmoynItqugBDunaeMcUfxL5XJZXgnkH6PFepVa6/l8k/hlhQesC7562OUElpx1Qg/1dD3hMRckUrTarIGcrQSJIs54zUpNiLwYH3zRWjNbqLWyd/8BYzIyBUrIM6xH3mbD7IvfEj6lJEuhL43IVeHnZ0da+GXjsiqFdyZl+OkFQ/fbVKonUMWmCqdBSLNpiWH5TfUpcvZY9BIYXuH+nWcBW3pfLeWSQQP0Kt/jfr5ifvfqv6R4ZROdr1KBr0k8caNAF4/FMgLJNHd3VC3L7TLJ31oKQUrQlz/F5cSveYuB5xhDctfiupr0N3vI5z7iAdl08KsECglxjEjh7hhk4mYMnIDRm44a6Ph3GE1Ns2Pno7c/6DNGZCRUQj/nHXyrurVob7PiLxuaxRO4OjrCTsWn+leV9UBnR8l+x4mohGK0wAc8LB4bzZq3w0M6RJJiSDa7fPcUeSMpGiVsaUJXPbE4nA8Xydusk/NgOxxskgEejVT8XUBHGX0BtxxAUCzBhwIE8zD36EDdoYY9Oq7Du8bQiffFNATwd3RzaNN0zHpJWpMHXGTzeSPrS+g2nmXSCL62aelvzY="
   file:
-    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqldiff"
-    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite3"
-    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite3_analyzer"
-    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/CHECKSUMS.sha1"
-    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite-tools-linux-x64-${S64_VERSION}.zip"
-    - "/home/travis/build/boramalper/sqlite3-x64/sqlite-src/sqlite-tools-linux-x64-${S64_VERSION}.zip.sha1"
+    - "/home/travis/build/s1037989/sqlite3-x64/sqlite-src/sqldiff"
+    - "/home/travis/build/s1037989/sqlite3-x64/sqlite-src/sqlite3"
+    - "/home/travis/build/s1037989/sqlite3-x64/sqlite-src/sqlite3_analyzer"
+    - "/home/travis/build/s1037989/sqlite3-x64/sqlite-src/CHECKSUMS.sha1"
+    - "/home/travis/build/s1037989/sqlite3-x64/sqlite-src/sqlite-tools-linux-x64-${S64_VERSION}.zip"
+    - "/home/travis/build/s1037989/sqlite3-x64/sqlite-src/sqlite-tools-linux-x64-${S64_VERSION}.zip.sha1"
   skip_cleanup: true
   on:
-    repo: "boramalper/sqlite3-x64"
+    repo: "s1037989/sqlite3-x64"
