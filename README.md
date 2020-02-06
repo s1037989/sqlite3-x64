@@ -60,7 +60,7 @@ To release the precompiled binaries for the newest version of SQLite:
    S64_VERSION=3240000
    ```
 
-4. Commit changes, and push.
+4. Commit changes and push.
 
    **Beware** of your commit message:
 
